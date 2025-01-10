@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+
+  # Redis
+  redis:
+    image: redis:7.0
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'       # AMQP protocol port
+      - '15672:15672'     # Management console port
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: 1234
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - es-net
+    ports:
+      - 9200:9200
+
+  # Kibana
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.16.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es-container:9200
+    networks:
+      - es-net
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+
+networks:
+  es-net:
+    driver: bridge
+
+volumes:
+  redis_data:
+  rabbitmq_data:
+  es_data:
