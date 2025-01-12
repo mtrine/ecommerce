@@ -6,6 +6,8 @@ import { Product, ProductSchema } from './schema/product.schema';
 import { Clothing, ClothingSchema } from './schema/clothing.schema';
 import { Electronics, ElectronicsSchema } from './schema/electronic.schema';
 import { ProductFactory } from './product.factory';
+import { ProductRepository } from './product.repo';
+import { Shop, ShopSchema } from '../shop/schema/shop.schema';
 
 @Module({
   imports: [
@@ -21,10 +23,14 @@ import { ProductFactory } from './product.factory';
       {
         name: Electronics.name,
         schema: ElectronicsSchema,
+      },
+      {
+        name:Shop.name,
+        schema:ShopSchema
       }
     ]),
   ],
   controllers: [ProductController],
-  providers: [ProductService, ProductFactory],
+  providers: [ProductService, ProductFactory,ProductRepository],
 })
 export class ProductModule {}

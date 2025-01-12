@@ -1,41 +1,45 @@
 import { CreateProductDto } from "./dto/create-product.dto";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { Clothing } from "./schema/clothing.schema";
 import { BaseProduct } from "./product.base";
 import { CustomException } from "src/exception-handler/custom-exception";
 import { ErrorCode } from "src/enums/error-code.enum";
 import { Electronics } from "./schema/electronic.schema";
 import { Product } from "./schema/product.schema";
+import { ProductRepository } from "./product.repo";
+import { UpdateProductDto } from "./dto/update-product.dto";
+import { UtilsService } from "src/utils/utils";
 
 export class ElectronicsProduct extends BaseProduct {
 
     constructor(
-        createProductDto: CreateProductDto,
+
         @InjectModel(Electronics.name) private electronicsModel: Model<Electronics>,
         @InjectModel(Product.name) protected readonly productModel: Model<Product>,
+        productRepository: ProductRepository
+
     ) {
-        super(createProductDto, productModel);
+        super(productModel, productRepository);
     }
 
-    async createProduct() {
+    async createProduct(createProductDto: CreateProductDto) {
         const newElectronic = await this.electronicsModel.create({
-            ...this.createProductDto.attributes,
-            shop: this.createProductDto.shop
+            ...createProductDto.attributes,
+            shop: createProductDto.shop
         });
         if (!newElectronic) {
             throw new CustomException(ErrorCode.ELECTRONIC_CREATE_FAILED);
         }
-        console.log("thumb"+this.createProductDto.thumb)
         const newProduct = await this.productModel.create({
             _id: newElectronic._id,
-            name: this.createProductDto.name,
-            type: this.createProductDto.type,
-            description: this.createProductDto.description,
-            thumb: this.createProductDto.thumb,
-            price: this.createProductDto.price,
-            quantity: this.createProductDto.quantity,
-            shop: this.createProductDto.shop,
+            name: createProductDto.name,
+            type: createProductDto.type,
+            description: createProductDto.description,
+            thumb: createProductDto.thumb,
+            price: createProductDto.price,
+            quantity: createProductDto.quantity,
+            shop: new Types.ObjectId(createProductDto.shop),
             attributes: newElectronic
 
         })
@@ -45,5 +49,21 @@ export class ElectronicsProduct extends BaseProduct {
         }
 
         return newProduct;
+    }
+
+    async updateProduct(productId: string, updateProductDto: UpdateProductDto) {
+        if (updateProductDto.attributes) {
+            var electronic = await this.productRepository.updateProductById(productId, updateProductDto.attributes, this.electronicsModel);
+        }
+        
+        const updatedProduct = await this.productModel.findByIdAndUpdate(productId, {
+            ...updateProductDto,
+            attributes: electronic
+        }, { new: true });
+
+        if (!updatedProduct) {
+            throw new CustomException(ErrorCode.UPDATE_PRODUCT_FAILED);
+        }
+        return updatedProduct;
     }
 }

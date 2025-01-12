@@ -6,6 +6,7 @@ import * as cookieParser from 'cookie-parser';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
@@ -14,6 +15,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
   }));
+
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
   // app.useGlobalFilters(new MongoExceptionFilter(),new HttpExceptionFilter());
   app.useGlobalGuards(new JwtAuthGuard(reflector));

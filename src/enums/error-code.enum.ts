@@ -6,7 +6,7 @@ export class ErrorCode {
     static readonly CLOTHING_CREATE_FAILED = new ErrorCode(1402, 'Clothing create failed', HttpStatus.BAD_REQUEST);
     static readonly ELECTRONIC_CREATE_FAILED = new ErrorCode(1402, 'Electronic create failed', HttpStatus.BAD_REQUEST);
     static readonly CREATE_PRODUCT_FAILED = new ErrorCode(1403, 'Create product failed', HttpStatus.BAD_REQUEST);
-    
+    static readonly UPDATE_PRODUCT_FAILED = new ErrorCode(1404, 'Update product failed', HttpStatus.BAD_REQUEST);
     private constructor(public readonly code: number, public readonly message: string, public readonly status: HttpStatus) { }
 
     toJSON() {
