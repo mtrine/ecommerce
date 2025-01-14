@@ -10,6 +10,8 @@ import { Product } from "./schema/product.schema";
 import { ProductRepository } from "./product.repo";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { UtilsService } from "src/utils/utils";
+import { InventoriesRepository } from "../inventories/inventories.repo";
+import { Inject } from "@nestjs/common";
 
 export class ElectronicsProduct extends BaseProduct {
 
@@ -17,10 +19,11 @@ export class ElectronicsProduct extends BaseProduct {
 
         @InjectModel(Electronics.name) private electronicsModel: Model<Electronics>,
         @InjectModel(Product.name) protected readonly productModel: Model<Product>,
-        productRepository: ProductRepository
+        productRepository: ProductRepository,
+        @Inject(InventoriesRepository) inventoryRepository: InventoriesRepository 
 
     ) {
-        super(productModel, productRepository);
+        super(productModel, productRepository, inventoryRepository);
     }
 
     async createProduct(createProductDto: CreateProductDto) {
@@ -31,20 +34,10 @@ export class ElectronicsProduct extends BaseProduct {
         if (!newElectronic) {
             throw new CustomException(ErrorCode.ELECTRONIC_CREATE_FAILED);
         }
-        const newProduct = await this.productModel.create({
-            _id: newElectronic._id,
-            name: createProductDto.name,
-            type: createProductDto.type,
-            description: createProductDto.description,
-            thumb: createProductDto.thumb,
-            price: createProductDto.price,
-            quantity: createProductDto.quantity,
-            shop: new Types.ObjectId(createProductDto.shop),
-            attributes: newElectronic
-
-        })
+        const newProduct = await super.createProduct(createProductDto, newElectronic._id.toString());
 
         if (!newProduct) {
+            await this.electronicsModel.findByIdAndDelete(newElectronic._id);
             throw new CustomException(ErrorCode.CREATE_PRODUCT_FAILED);
         }
 
@@ -53,13 +46,11 @@ export class ElectronicsProduct extends BaseProduct {
 
     async updateProduct(productId: string, updateProductDto: UpdateProductDto) {
         if (updateProductDto.attributes) {
-            var electronic = await this.productRepository.updateProductById(productId, updateProductDto.attributes, this.electronicsModel);
+             await this.productRepository.updateProductById(productId, UtilsService.updateNestedObject(updateProductDto.attributes), this.electronicsModel);
         }
-        
-        const updatedProduct = await this.productModel.findByIdAndUpdate(productId, {
-            ...updateProductDto,
-            attributes: electronic
-        }, { new: true });
+
+        const updatedProduct = await this.productModel.findByIdAndUpdate(productId, UtilsService.updateNestedObject(updateProductDto)
+            , { new: true });
 
         if (!updatedProduct) {
             throw new CustomException(ErrorCode.UPDATE_PRODUCT_FAILED);

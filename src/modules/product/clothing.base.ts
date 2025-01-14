@@ -8,14 +8,18 @@ import { ErrorCode } from "src/enums/error-code.enum";
 import { Product } from "./schema/product.schema";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { ProductRepository } from "./product.repo";
+import { UtilsService } from "src/utils/utils";
+import { Inject } from "@nestjs/common";
+import { InventoriesRepository } from "../inventories/inventories.repo";
 export class ClothingProduct extends BaseProduct {
     constructor(
         @InjectModel(Clothing.name) private clothingModel: Model<Clothing>,
         @InjectModel(Product.name) protected readonly productModel: Model<Product>,
-        protected productRepository: ProductRepository
+        protected productRepository: ProductRepository,
+        @Inject(InventoriesRepository) inventoryRepository: InventoriesRepository 
 
     ) {
-        super(productModel, productRepository);
+        super(productModel, productRepository,inventoryRepository);
     }
 
     async createProduct(createProductDto: CreateProductDto) {
@@ -35,7 +39,7 @@ export class ClothingProduct extends BaseProduct {
             thumb: createProductDto.thumb,
             quantity: createProductDto.quantity,
             shop: new Types.ObjectId(createProductDto.shop),
-            attributes: newClothing
+            attributes: createProductDto.attributes
 
         })
         if (!newProduct) {
@@ -46,13 +50,10 @@ export class ClothingProduct extends BaseProduct {
 
     async updateProduct(productId: string, updateProductDto: UpdateProductDto) {
         if (updateProductDto.attributes) {
-            var clothing = await this.productRepository.updateProductById(productId, updateProductDto.attributes, this.clothingModel);
+            await this.productRepository.updateProductById(productId, UtilsService.updateNestedObject(updateProductDto.attributes), this.clothingModel);
         }
         const updatedProduct = await this.productModel.findByIdAndUpdate(productId,
-            {
-                ...updateProductDto,
-                attributes: clothing
-            }
+            UtilsService.updateNestedObject(updateProductDto)
             , { new: true });
         if (!updatedProduct) {
             throw new CustomException(ErrorCode.UPDATE_PRODUCT_FAILED);

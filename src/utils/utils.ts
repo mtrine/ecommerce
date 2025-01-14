@@ -13,4 +13,20 @@ export class UtilsService {
         });
         return obj;
     }
+
+    static updateNestedObject(obj: Record<string, any>) {
+        const finalObj = {};
+        Object.keys(obj).forEach(key => {
+            if(typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+                const response = this.updateNestedObject(obj[key]);
+                Object.keys(response).forEach(k => {
+                    finalObj[`${key}.${k}`] = response[k];
+                })
+            }
+            else{
+                finalObj[key] = obj[key];
+            }
+        })
+        return finalObj;
+    }
 }

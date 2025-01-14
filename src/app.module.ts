@@ -10,6 +10,8 @@ import * as redisStore from 'cache-manager-redis-store';
 import { ShopModule } from './modules/shop/shop.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProductModule } from './modules/product/product.module';
+import { InventoriesModule } from './modules/inventories/inventories.module';
+import { DiscountModule } from './modules/discount/discount.module';
 
 
 @Module({
@@ -35,6 +37,8 @@ import { ProductModule } from './modules/product/product.module';
     ShopModule,
     AuthModule,
     ProductModule,
+    InventoriesModule,
+    DiscountModule,
    
   ],
   controllers: [AppController],
