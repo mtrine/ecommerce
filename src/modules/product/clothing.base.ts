@@ -38,7 +38,7 @@ export class ClothingProduct extends BaseProduct {
             price: createProductDto.price,
             thumb: createProductDto.thumb,
             quantity: createProductDto.quantity,
-            shop: new Types.ObjectId(createProductDto.shop),
+            shop: createProductDto.shop,
             attributes: createProductDto.attributes
 
         })

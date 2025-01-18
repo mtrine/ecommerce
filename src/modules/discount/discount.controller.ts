@@ -1,34 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { DiscountService } from './discount.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
+import { User } from 'src/decorators/user-infor.decorator';
+import { get } from 'mongoose';
+import { GetDiscountDto } from './dto/get-discount-amount.dto';
+import { IShop } from '../shop/shop.interface';
+import { Shop } from '../shop/schema/shop.schema';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('discount')
 export class DiscountController {
-  constructor(private readonly discountService: DiscountService) {}
+  constructor(private readonly discountService: DiscountService) { }
 
   @Post()
-  create(@Body() createDiscountDto: CreateDiscountDto) {
-    return this.discountService.create(createDiscountDto);
+  create(@Body() createDiscountDto: CreateDiscountDto, @User() shopId: string) {
+    return this.discountService.createDiscount(createDiscountDto, shopId);
   }
 
   @Get()
-  findAll() {
-    return this.discountService.findAll();
+  @Public()
+  getAllDiscountCode(@Query("shopId") shopId:string, @Query('limit') limit: number, @Query('page') page: number) {
+    return this.discountService.getAllDiscountCodeByShop(limit, page, shopId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.discountService.findOne(+id);
+  @Post("/amount")
+  @Public()
+  getDiscountAmount(@Query("shopId") shopId:string, @Body() getDiscountDto: GetDiscountDto) {
+    return this.discountService.getDiscountAmount(getDiscountDto,  shopId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDiscountDto: UpdateDiscountDto) {
-    return this.discountService.update(+id, updateDiscountDto);
+  @Get("/list_product_code")
+  @Public()
+  getAllDiscountWithProducts(@Query("shopId") shopId:string, @Query('limit') limit: number, @Query('page') page: number, @Query('code') code: string) {
+    return this.discountService.getAllDiscountCodesWithProducts(code,  shopId, limit, page);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.discountService.remove(+id);
+  @Get("/shop")
+  @Public()
+  getAllDiscountCodesByShop(@Query("shopId") shopId:string, @Query('limit') limit: number, @Query('page') page: number){
+    return this.discountService.getAllDiscountCodeByShop(limit, page, shopId);
   }
+
+
 }

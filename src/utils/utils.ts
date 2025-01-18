@@ -1,4 +1,11 @@
 export class UtilsService {
+    static getSelectData(select: Array<string>) {
+        return Object.fromEntries(select.map((item) => [item, 1]));
+    }
+
+    static unGetSelectData(select: Array<string>) {
+        return Object.fromEntries(select.map((item) => [item, 0]));
+    }
     static removeUndefinedAndNull(obj: Record<string, any>) {
         // Duyệt qua tất cả các khóa của đối tượng
         Object.keys(obj).forEach(key => {
@@ -17,13 +24,13 @@ export class UtilsService {
     static updateNestedObject(obj: Record<string, any>) {
         const finalObj = {};
         Object.keys(obj).forEach(key => {
-            if(typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+            if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
                 const response = this.updateNestedObject(obj[key]);
                 Object.keys(response).forEach(k => {
                     finalObj[`${key}.${k}`] = response[k];
                 })
             }
-            else{
+            else {
                 finalObj[key] = obj[key];
             }
         })

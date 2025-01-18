@@ -37,5 +37,6 @@ import { ElectronicsProduct } from './electronics.base';
   ],
   controllers: [ProductController],
   providers: [ProductService, ProductFactory,ProductRepository,BaseProduct, ElectronicsProduct],
+  exports: [ProductService,ProductRepository],
 })
 export class ProductModule {}

@@ -20,7 +20,7 @@ export class ProductService {
   }
 
   async findAllDraftsForShop(shopId: string, limit = 50, skip = 0) {
-    const query = { shop: new Types.ObjectId(shopId), isDraft: true };
+    const query = { shop: shopId, isDraft: true };
     return await this.productRepository.queryProduct(query, limit, skip);
 
   }
@@ -36,7 +36,7 @@ export class ProductService {
   }
 
   async findAllPublicForShop(shopId: string, limit = 50, skip = 0) {
-    const query = { shop: new Types.ObjectId(shopId), isPublic: true };
+    const query = { shop: shopId, isPublic: true };
     return await this.productRepository.queryProduct(query, limit, skip);
   }
 
@@ -45,19 +45,19 @@ export class ProductService {
     return await this.productRepository.searchProduct(keysearch, limit, skip);
   }
 
-  async findAllProducts(limit: number = 50, page: number = 1, sort: string = 'ctime', filter = { isPublic: true }) {
-    return await this.productRepository.findAllProducts(limit, sort, page, filter, ["name", "price", "description"]);
+  async findAllProducts(limit: number = 50, page: number = 1, sort: string = 'ctime', filter: any = { isPublic: true }, select: string[] = ["name", "price", "description"]) {
+    return await this.productRepository.findAllProducts(limit, sort, page, filter, select);
   }
-
+  
   async findProductById(productId: string) {
     return await this.productRepository.findProduct(productId, ["__v"]);
   }
 
- async updateProduct(productId: string, updateProductDto: UpdateProductDto) {
+  async updateProduct(productId: string, updateProductDto: UpdateProductDto) {
     const { type } = updateProductDto;
 
     const product = this.productFactory.updateProduct(type, productId, updateProductDto);
 
     return product
- }
+  }
 }

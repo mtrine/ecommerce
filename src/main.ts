@@ -14,6 +14,8 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
   }));
 
   app.useGlobalInterceptors(new TransformInterceptor(reflector));

@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProductModule } from './modules/product/product.module';
 import { InventoriesModule } from './modules/inventories/inventories.module';
 import { DiscountModule } from './modules/discount/discount.module';
+import { CartModule } from './modules/cart/cart.module';
 
 
 @Module({
@@ -39,6 +40,7 @@ import { DiscountModule } from './modules/discount/discount.module';
     ProductModule,
     InventoriesModule,
     DiscountModule,
+    CartModule,
    
   ],
   controllers: [AppController],

@@ -1,4 +1,4 @@
-import { Prop, Schema } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { DiscountAppliesTo } from "src/enums/discount-applies-to.enum";
 
 @Schema({ timestamps: true })
@@ -118,3 +118,5 @@ export class Discount {
     )
     products: Array<string>
 }
+
+ export const DiscountSchema = SchemaFactory.createForClass(Discount);
