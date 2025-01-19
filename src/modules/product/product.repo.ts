@@ -98,4 +98,17 @@ export class ProductRepository {
             _id: productId
         }).lean();
     }
+
+    async checkProducts(products: Array<any>){
+       return await Promise.all(products.map(async (productId) => {
+        const foundProduct = await this.findProduct(productId.productId,['__v'])
+        if(foundProduct){
+           return{
+            price: foundProduct.price,
+            quantity: foundProduct.quantity,
+            _id: foundProduct._id
+           }
+        }
+       }))
+    }
 }

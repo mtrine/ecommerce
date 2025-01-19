@@ -1,26 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Inventory } from './schema/inventory.schema';
+import { Model } from 'mongoose';
+import { ProductRepository } from '../product/product.repo';
+import { CustomException } from 'src/exception-handler/custom-exception';
+import { ErrorCode } from 'src/enums/error-code.enum';
 
 @Injectable()
 export class InventoriesService {
-  create(createInventoryDto: CreateInventoryDto) {
-    return 'This action adds a new inventory';
-  }
+  constructor(
+    @InjectModel(Inventory.name) private inventoryModel: Model<Inventory>,
+    private productRepository: ProductRepository
+  ) { }
 
-  findAll() {
-    return `This action returns all inventories`;
-  }
+  async addStockToInventory(createInventoryDto: CreateInventoryDto) {
+    const product = await this.productRepository.getProductsById(createInventoryDto.productId);
 
-  findOne(id: number) {
-    return `This action returns a #${id} inventory`;
-  }
+    if (!product) {
+      throw new CustomException(ErrorCode.NOT_FOUND);
+    }
 
-  update(id: number, updateInventoryDto: UpdateInventoryDto) {
-    return `This action updates a #${id} inventory`;
-  }
+    const query = {
+      shopId: createInventoryDto.shopId,
+      productId: createInventoryDto.productId
+    }, updateSet = {
+      $inc: {
+        stock: createInventoryDto.stock
+      },
+      $set:{
+        location:createInventoryDto.location
+      }
+    },options={new:true,upsert:true};
 
-  remove(id: number) {
-    return `This action removes a #${id} inventory`;
+    return await this.inventoryModel.findOneAndUpdate(query, updateSet, options);
   }
 }

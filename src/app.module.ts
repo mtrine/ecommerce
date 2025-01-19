@@ -13,6 +13,8 @@ import { ProductModule } from './modules/product/product.module';
 import { InventoriesModule } from './modules/inventories/inventories.module';
 import { DiscountModule } from './modules/discount/discount.module';
 import { CartModule } from './modules/cart/cart.module';
+import { OrderModule } from './modules/order/order.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 
 @Module({
@@ -41,6 +43,8 @@ import { CartModule } from './modules/cart/cart.module';
     InventoriesModule,
     DiscountModule,
     CartModule,
+    OrderModule,
+    RedisModule,
    
   ],
   controllers: [AppController],

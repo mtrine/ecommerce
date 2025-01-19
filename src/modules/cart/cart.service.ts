@@ -31,20 +31,41 @@ export class CartService {
   }
 
   async updateUserCartQuantity(addToCartDto: AddToCartDto) {
-    const { productId, quantity } = addToCartDto.product
+    const { productId, quantity } = addToCartDto.product;
+  
     const query = {
       userId: addToCartDto.userId,
       'products.productId': productId,
-      state: CartState.ACTIVE
+      state: CartState.ACTIVE,
+    };
+  
+    const update = {
+      $inc: {
+        'products.$.quantity': quantity, // Tăng số lượng nếu sản phẩm đã tồn tại
+      },
+    };
+  
+    const options = { new: true };
+  
+    // Kiểm tra sản phẩm đã tồn tại trong cart chưa
+    const updatedCart = await this.cartModel.findOneAndUpdate(query, update, options).lean();
+  
+    if (!updatedCart) {
+      // Nếu sản phẩm chưa tồn tại, thêm nó vào cart
+      return await this.cartModel.findOneAndUpdate(
+        { userId: addToCartDto.userId, state: CartState.ACTIVE },
+        {
+          $push: {
+            products: addToCartDto.product, // Thêm sản phẩm mới vào danh sách
+          },
+        },
+        options
+      ).lean();
     }
-      , updateOrInsert = {
-        $inc: {
-          'products.$.quantity': quantity
-        }
-      }, options = { upsert: true, new: true }
-
-    return await this.cartModel.findOneAndUpdate(query, updateOrInsert, options).lean();
+  
+    return updatedCart;
   }
+  
 
   async addToCart(addToCartDto: AddToCartDto) {
     const userCart = await this.cartModel.findOne({
